@@ -33,26 +33,30 @@ async function run() {
         const menuCollection = client.db('BistroDB').collection('menu');
         const reviewCollection = client.db('BistroDB').collection('reviews');
         const CartCollection = client.db('BistroDB').collection('carts');
+        const userCollection = client.db('BistroDB').collection('users');
 
+        // menu
         app.get('/menu', async (req, res) => {
             const result = await menuCollection.find().toArray()
             res.send(result)
         })
 
+        // review
         app.get('/reviews', async (req, res) => {
             const result = await reviewCollection.find().toArray()
             res.send(result)
         })
 
-        app.post('/carts', async (req, res) => {
-            const food = req.body;
-            const result = await CartCollection.insertOne(food)
-            res.send(result)
-        })
+        // carts
         app.get('/carts', async (req, res) => {
             const email = req.query.email;
             const query = { email: email }
             const result = await CartCollection.find(query).toArray()
+            res.send(result)
+        })
+        app.post('/carts', async (req, res) => {
+            const food = req.body;
+            const result = await CartCollection.insertOne(food)
             res.send(result)
         })
         app.delete('/carts/:id', async (req, res) => {
@@ -62,7 +66,13 @@ async function run() {
             res.send(result)
         })
 
-
+        // user
+      
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await userCollection.insertOne(user)
+            res.send(result)
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
