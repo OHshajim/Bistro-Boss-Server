@@ -81,6 +81,13 @@ async function run() {
             res.send(result)
         })
 
+        app.post('/menu', async (req, res) => {
+            const menu = req.body;
+            const result = await menuCollection.insertOne(menu)
+            res.send(result)
+        })
+
+
         // review
         app.get('/reviews', async (req, res) => {
             const result = await reviewCollection.find().toArray()
@@ -124,7 +131,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/users/admin/:id',verifyToken, verifyAdmin, async (req, res) => {
+        app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const updateUser = {
@@ -136,7 +143,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/user/admin/:email', verifyToken,verifyAdmin, async (req, res) => {
+        app.get('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email;
             console.log(req.decoded);
             if (email !== req.decoded.email) {
@@ -151,7 +158,7 @@ async function run() {
             res.send({ admin })
         })
 
-        app.delete('/users/:id',verifyToken, verifyAdmin, async (req, res) => {
+        app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await userCollection.deleteOne(query)
