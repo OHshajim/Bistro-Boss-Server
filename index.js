@@ -80,13 +80,36 @@ async function run() {
             const result = await menuCollection.find().toArray()
             res.send(result)
         })
-
-        app.post('/menu', async (req, res) => {
+        app.get('/menu/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await menuCollection.findOne(query)
+            res.send(result)
+        })
+        app.patch('/menu/:id', verifyToken, verifyAdmin, async (req, res) => {
+            const item = req.body;
+            console.log(item);
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            // const options = { upsert: true };
+            const updatedItem = {
+                $set: {
+                    name: item.name,
+                    category: item.category,
+                    price: item.price,
+                    recipe: item.recipe,
+                    image: item.image
+                }
+            }
+            const result = await menuCollection.updateOne(filter, updatedItem)
+            res.send(result)
+        })
+        app.post('/menu', verifyToken, verifyAdmin, async (req, res) => {
             const menu = req.body;
             const result = await menuCollection.insertOne(menu)
             res.send(result)
         })
-        app.delete('/menuItem/:id', async (req, res) => {
+        app.delete('/menuItem/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await menuCollection.deleteOne(query)
