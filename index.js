@@ -86,7 +86,12 @@ async function run() {
             const result = await menuCollection.insertOne(menu)
             res.send(result)
         })
-
+        app.delete('/menuItem/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await menuCollection.deleteOne(query)
+            res.send(result)
+        })
 
         // review
         app.get('/reviews', async (req, res) => {
@@ -145,7 +150,7 @@ async function run() {
 
         app.get('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email;
-            console.log(req.decoded);
+            // console.log(req.decoded);
             if (email !== req.decoded.email) {
                 return res.status(403).send({ message: 'forbidden Access' })
             }
