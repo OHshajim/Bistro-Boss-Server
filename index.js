@@ -226,7 +226,7 @@ async function run() {
             const result = await paymentCollection.find(query).toArray()
             res.send(result)
         })
-        
+
         app.post('/payment', async (req, res) => {
             const stateMent = req.body;
             const PaymentRes = await paymentCollection.insertOne(stateMent)
@@ -237,6 +237,26 @@ async function run() {
             }
             const result = await CartCollection.deleteMany(query)
             res.send({ PaymentRes, result })
+        })
+
+
+        //stats or analysis
+        app.get('/admin-stats', async (req, res) => {
+            const users = await userCollection.estimatedDocumentCount()
+            const menuItems = await menuCollection.estimatedDocumentCount()
+            const orders = await paymentCollection.estimatedDocumentCount()
+            const result = await paymentCollection.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: {
+                            $sum: '$price'
+                        }
+                    }
+                }
+            ]).toArray()
+            const revenue = result.length > 0 ? result[0].totalRevenue : 0;
+            res.send({ users, menuItems, orders, revenue })
         })
 
         // Send a ping to confirm a successful connection
