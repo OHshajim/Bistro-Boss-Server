@@ -173,7 +173,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/user/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/user/admin/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             // console.log(req.decoded);
             if (email !== req.decoded.email) {
@@ -226,6 +226,7 @@ async function run() {
             const result = await paymentCollection.find(query).toArray()
             res.send(result)
         })
+        
         app.post('/payment', async (req, res) => {
             const stateMent = req.body;
             const PaymentRes = await paymentCollection.insertOne(stateMent)
