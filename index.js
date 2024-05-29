@@ -36,6 +36,7 @@ async function run() {
         const reviewCollection = client.db('BistroDB').collection('reviews');
         const CartCollection = client.db('BistroDB').collection('carts');
         const userCollection = client.db('BistroDB').collection('users');
+        const paymentCollection = client.db('BistroDB').collection('payments');
 
         // custom middlewares
         const verifyToken = (req, res, next) => {
@@ -214,6 +215,28 @@ async function run() {
             })
         })
 
+        app.get('/payment/:email', verifyToken, async (req, res) => {
+            const email = req.params.email;
+            if (email !== req.decoded.email) {
+                return res.status(401).send({ message: 'unauthorized access' })
+            }
+            const query = {
+                email: email
+            }
+            const result = await paymentCollection.find(query).toArray()
+            res.send(result)
+        })
+        app.post('/payment', async (req, res) => {
+            const stateMent = req.body;
+            const PaymentRes = await paymentCollection.insertOne(stateMent)
+            const query = {
+                _id: {
+                    $in: stateMent.cartsId.map(id => new ObjectId(id))
+                }
+            }
+            const result = await CartCollection.deleteMany(query)
+            res.send({ PaymentRes, result })
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
