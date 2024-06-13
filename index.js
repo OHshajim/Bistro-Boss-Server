@@ -12,7 +12,7 @@ const mailgun = new Mailgun(formData);
 
 const mg = mailgun.client({
     username: 'Shajim',
-    key: process.env.Mail_gun_key 
+    key: process.env.MAIL_GUN_KEY ,
 });
 
 
@@ -249,7 +249,7 @@ async function run() {
 
             // email configurations
             mg.messages.create(process.env.MAIL_DOMAIN, {
-                from: "Client <sandbox60ca8b7ba8e64bddb9d3318272e10aba.mailgun.org>",
+                from: "Mailgun Sandbox                                                             <sandbox60ca8b7ba8e64bddb9d3318272e10aba.mailgun.org>",
                 to: ["ajshajimmax7878@gmail.com"],
                 subject: "Bistro Boss Order Confirmed",
                 text: "Thank you for your order!!!",
