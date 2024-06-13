@@ -6,6 +6,15 @@ require('dotenv').config();
 const stripe = require('stripe')(process.env.STRIPE_KEY)
 const app = express();
 const port = process.env.PORT || 5000;
+const formData = require('form-data');
+const Mailgun = require('mailgun.js');
+const mailgun = new Mailgun(formData);
+
+const mg = mailgun.client({
+    username: 'Shajim',
+    key: process.env.Mail_gun_key 
+});
+
 
 
 // middleware 
@@ -15,7 +24,8 @@ app.use(express.json());
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.q9eobgc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
-// const uri = `mongodb+srv://BistroBoss:jZbBcprWKpUr5yio@cluster0.q9eobgc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+
+
 
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -51,7 +61,7 @@ async function run() {
                     return res.status(401).send({ message: 'unauthorized Access' })
                 }
                 req.decoded = decoded;
-                console.log(decoded);
+                // console.log(decoded);
                 next()
             })
         }
@@ -235,13 +245,30 @@ async function run() {
                     $in: stateMent.cartsId.map(id => new ObjectId(id))
                 }
             }
-            const result = await CartCollection.deleteMany(query)
+            const result = await CartCollection.deleteMany(query);
+
+            // email configurations
+            mg.messages.create(process.env.MAIL_DOMAIN, {
+                from: "Client <sandbox60ca8b7ba8e64bddb9d3318272e10aba.mailgun.org>",
+                to: ["ajshajimmax7878@gmail.com"],
+                subject: "Bistro Boss Order Confirmed",
+                text: "Thank you for your order!!!",
+                html: `
+                <div>
+                <h1> Thank You for your Order!!! </h1>
+                <h4> Your TransactionID :${stateMent.transactionID} </h4>
+                <p> We would like to get your Feedback !!! </p>
+                </div> `
+            })
+                .then(msg => console.log(msg)) // logs response data
+                .catch(err => console.log(err)); // logs any error
+
             res.send({ PaymentRes, result })
         })
 
 
         //stats or analysis
-        app.get('/admin-stats',verifyToken,verifyAdmin, async (req, res) => {
+        app.get('/admin-stats', verifyToken, verifyAdmin, async (req, res) => {
             const users = await userCollection.estimatedDocumentCount()
             const menuItems = await menuCollection.estimatedDocumentCount()
             const orders = await paymentCollection.estimatedDocumentCount()
@@ -261,7 +288,7 @@ async function run() {
             res.send({ users, menuItems, orders, revenue })
         })
 
-        app.get('/order-stats',verifyToken,verifyAdmin, async (req, res) => {
+        app.get('/order-stats', verifyToken, verifyAdmin, async (req, res) => {
 
             const result = await paymentCollection.aggregate([
                 {
